@@ -2066,15 +2066,30 @@ StaffDetector = Utility.NewButton({
 
 local hackerdetectorcon
 local heightCheckConnection
-local notifiedPlayers = {} 
+local notifiedPlayers = {}
+
+-- 定义你想要检测的玩家名字列表
+local keywords = {"Vxpe", "AlSploit", "blankedvoid", "Render"}
+
+-- 检测玩家名字是否包含指定的关键字
+local function checkPlayerName(plr)
+    local playerName = plr.Name:lower()
+    local matchedKeywords = {}
+    for _, keyword in ipairs(keywords) do
+        if string.find(playerName, keyword:lower()) then
+            table.insert(matchedKeywords, keyword)
+        end
+    end
+    return matchedKeywords
+end
 
 HackerDetector = Utility.NewButton({
-	Name = "HackerDetector",
-	Function = function(callback)
-		if callback then
+    Name = "HackerDetector",
+    Function = function(callback)
+        if callback then
             task.wait(1)
 
-            local function checkPlayerHeight(plr)
+            local function checkPlayer(plr)
                 if plr and plr.Character then
                     plr.CharacterAdded:Connect(function(character)
                         task.wait(1)
@@ -2082,7 +2097,7 @@ HackerDetector = Utility.NewButton({
                             local rootPart = character:FindFirstChild("HumanoidRootPart")
                             if rootPart and rootPart.Position.Y > 999 then
                                 if not notifiedPlayers[plr.Name] then
-                                    sound = Instance.new("Sound",workspace)
+                                    sound = Instance.new("Sound", workspace)
                                     sound.Name = "Noooooooooooooooot noooooooooooooooooooooooot"
                                     sound.SoundId = "rbxassetid://7383525713"
                                     sound:Play()
@@ -2095,14 +2110,29 @@ HackerDetector = Utility.NewButton({
                         end
                     end)
                 end
+
+                -- 检查玩家名字
+                local matchedKeywords = checkPlayerName(plr)
+                if #matchedKeywords > 0 then
+                    if not notifiedPlayers[plr.Name] then
+                        local keywordList = table.concat(matchedKeywords, ", ")
+                        sound = Instance.new("Sound", workspace)
+                        sound.Name = "Noooooooooooooooot noooooooooooooooooooooooot"
+                        sound.SoundId = "rbxassetid://7383525713"
+                        sound:Play()
+                        CreateNotification2("HackerDetector", 30, plr.Name .. " has a suspicious name! Keywords detected: " .. keywordList)
+                        writefile("HackerDetector_log", plr.Name)
+                        notifiedPlayers[plr.Name] = true
+                    end
+                end
             end
 
             for _, plr in pairs(game.Players:GetPlayers()) do
-                checkPlayerHeight(plr)
+                checkPlayer(plr)
             end
 
             hackerdetectorcon = game.Players.PlayerAdded:Connect(function(plr)
-                checkPlayerHeight(plr)
+                checkPlayer(plr)
             end)
 
             heightCheckConnection = game:GetService("RunService").Stepped:Connect(function()
@@ -2111,11 +2141,11 @@ HackerDetector = Utility.NewButton({
                         local rootPart = plr.Character:FindFirstChild("HumanoidRootPart")
                         if rootPart.Position.Y > 999 then
                             if not notifiedPlayers[plr.Name] then
-                                sound = Instance.new("Sound",workspace)
+                                sound = Instance.new("Sound", workspace)
                                 sound.Name = "Noooooooooooooooot noooooooooooooooooooooooot"
                                 sound.SoundId = "rbxassetid://7383525713"
                                 sound:Play()
-								CreateNotification2("HackerDetector", 30, plr.Name .. " is using InfiniteFly!")
+                                CreateNotification2("HackerDetector", 30, plr.Name .. " is using InfiniteFly!")
                                 writefile("HackerDetector_log", plr.Name)
                                 notifiedPlayers[plr.Name] = true
                             end
@@ -2124,7 +2154,6 @@ HackerDetector = Utility.NewButton({
                 end
             end)
         else
-            
             if hackerdetectorcon then
                 hackerdetectorcon:Disconnect()
             end
@@ -2135,6 +2164,8 @@ HackerDetector = Utility.NewButton({
         end
     end,
 })
+
+
 
 LagbackDetector = Utility.NewButton({
 	Name = "LagbackDetector",
